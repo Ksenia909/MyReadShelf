@@ -1,15 +1,8 @@
-import enum
-
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core import ReadingStatus
 from app.db import Base
-
-
-class ReadingStatus(str, enum.Enum):
-    to_read = "to_read"
-    reading = "reading"
-    read = "read"
 
 
 class LibraryBook(Base):
