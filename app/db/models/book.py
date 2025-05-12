@@ -11,4 +11,4 @@ class Book(Base):
     title: Mapped[str] = mapped_column(String, index=True)
     author: Mapped[str] = mapped_column(String, index=True)
 
-    library_items: Mapped[list["LibraryBook"]] = relationship(back_populates="book")
+    in_libraries: Mapped[list["LibraryBook"]] = relationship(back_populates="book")

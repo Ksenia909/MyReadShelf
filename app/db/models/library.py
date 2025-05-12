@@ -11,6 +11,6 @@ class Library(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
 
     user: Mapped["User"] = relationship(back_populates="library")
-    books: Mapped[list["LibraryItem"]] = relationship(
+    books: Mapped[list["LibraryBook"]] = relationship(
         back_populates="library", cascade="all, delete-orphan"
     )
