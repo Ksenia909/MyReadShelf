@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.core import ReadingStatus
-from app.schemas.book import BookRead
+from apps.books.api.schemas.book import BookRead
+from core.enum import ReadingStatus
 
 
 class LibraryBookBase(BaseModel):

@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.schemas.library_books import LibraryBookRead
+from apps.books.api.schemas.library_books import LibraryBookRead
 
 
 class LibraryRead(BaseModel):
