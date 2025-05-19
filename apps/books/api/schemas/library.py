@@ -1,13 +1,27 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
-from apps.books.api.schemas.library_books import LibraryBookRead
+
+class LibraryBase(BaseModel):
+    name: str
+    genre: Optional[str] = None
+    description: Optional[str] = None
 
 
-class LibraryRead(BaseModel):
+class LibraryCreate(LibraryBase):
+    pass
+
+
+class LibraryRead(LibraryBase):
     id: int
-    books: List[LibraryBookRead]
+    user_id: int
+    books: List["LibraryBookRead"] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+from .library_books import LibraryBookRead
+
+LibraryRead.model_rebuild()

@@ -40,3 +40,16 @@ async def create_book(
     await db.commit()
     await db.refresh(new_book)
     return new_book
+
+
+@router.delete("/{book_id}")
+async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(models.Book).filter(models.Book.id == book_id)
+    )
+    book = result.scalar_one_or_none()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    await db.delete(book)
+    await db.commit()
+    return {"detail": "Book deleted"}

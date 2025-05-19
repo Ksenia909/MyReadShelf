@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from .endpoints import book
+from .endpoints import book, library
 
 router = APIRouter(prefix="/api/v1")
 
 router.include_router(book.router, prefix="/books", tags=["books"])
-# library_router = APIRouter(prefix="/library", tags=["library"])
+router.include_router(library.router, prefix="/library", tags=["library"])

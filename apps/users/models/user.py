@@ -12,6 +12,6 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True)
     hashed_password: Mapped[str] = mapped_column(String)
 
-    library: Mapped[list["Library"]] = relationship(
+    libraries: Mapped[list["Library"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

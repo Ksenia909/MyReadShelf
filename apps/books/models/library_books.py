@@ -1,4 +1,4 @@
-from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy import Enum, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database import Base
@@ -14,7 +14,7 @@ class LibraryBook(Base):
     status: Mapped[ReadingStatus] = mapped_column(
         Enum(ReadingStatus), default=ReadingStatus.to_read
     )
-    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     library: Mapped["Library"] = relationship(back_populates="books")
     book: Mapped["Book"] = relationship(back_populates="in_libraries")

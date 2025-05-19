@@ -2,7 +2,6 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from apps.books.api.schemas.book import BookRead
 from core.enum import ReadingStatus
 
 
@@ -18,7 +17,12 @@ class LibraryBookCreate(LibraryBookBase):
 
 class LibraryBookRead(LibraryBookBase):
     id: int
-    book: BookRead
+    book: 'BookRead'
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+from .book import BookRead
+
+LibraryBookRead.model_rebuild()
