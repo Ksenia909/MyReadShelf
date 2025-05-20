@@ -8,7 +8,11 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    DATABASE_URL: str
+    postgres_user: str
+    postgres_password: str
+    postgres_host: str
+    postgres_port: str
+    postgres_db: str
 
 
 settings = Settings()

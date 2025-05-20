@@ -15,5 +15,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="MyReadShelf", lifespan=lifespan)
+
 app.include_router(books_router)
 app.include_router(users_router)
