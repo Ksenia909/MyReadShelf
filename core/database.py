@@ -4,14 +4,9 @@ from sqlalchemy.orm import declarative_base
 
 from core.config import settings
 
-DATABASE_URL = (
-    f"postgresql+asyncpg://{settings.postgres_user}:"
-    f"{settings.postgres_password}@{settings.postgres_host}:"
-    f"{settings.postgres_port}/{settings.postgres_db}"
-)
 
 engine = create_async_engine(
-    DATABASE_URL,
+    settings.ASYNC_DATABASE_URL,
     echo=True,
     future=True
 )
