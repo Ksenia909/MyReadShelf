@@ -1,8 +1,8 @@
 __all__ = [
-    "BookCreate", "BookRead",
+    "BookCreate", "BookRead", "LibraryCreate",
     "LibraryRead", "LibraryBookCreate", "LibraryBookRead"
 ]
 
 from .book import BookCreate, BookRead
-from .library import LibraryRead
+from .library import LibraryCreate, LibraryRead
 from .library_books import LibraryBookCreate, LibraryBookRead
