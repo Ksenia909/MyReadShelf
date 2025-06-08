@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from apps.books.api.router import router as books_router
-from apps.users.api.router import router as users_router
+import apps.books.models
+import apps.users.models
 from core.database import Base, engine
+from core.router_register import register_all_service_routers
 
 
 @asynccontextmanager
@@ -16,5 +17,4 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="MyReadShelf", lifespan=lifespan)
 
-app.include_router(books_router)
-app.include_router(users_router)
+register_all_service_routers(app)
