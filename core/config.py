@@ -26,5 +26,13 @@ class Settings(BaseSettings):
             f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 
+    @property
+    def SYNC_DATABASE_URL(self):
+        return (
+            f"postgresql+psycopg2://"
+            f"{self.postgres_user}:{self.postgres_password}@"
+            f"localhost:{self.postgres_port}/{self.postgres_db}"
+        )
+
 
 settings = Settings()
