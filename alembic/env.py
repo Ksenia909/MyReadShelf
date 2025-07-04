@@ -1,19 +1,67 @@
+import asyncio
+import logging
+import os
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool
+from dotenv import load_dotenv
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
-import apps.books.models
-import apps.users.models
 from alembic import context
 from core.config import settings
 from core.database import Base
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# Добавляем корень проекта в sys.path для импорта модулей
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Загружаем .env
+load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+
+def load_all_models():
+    """
+    Сканирует директорию apps/ и загружает модели из всех apps/<service>/models
+    """
+    apps_dir = Path(__file__).parent.parent / "apps"
+    if not apps_dir.exists():
+        raise FileNotFoundError("Директория apps/ не найдена")
+
+    for service_dir in apps_dir.iterdir():
+        if not service_dir.is_dir():
+            continue
+
+        service_name = service_dir.name
+        models_dir = service_dir / "models"
+
+        if not models_dir.exists():
+            continue
+
+        for model_file in models_dir.iterdir():
+            file_name = model_file.stem
+            if file_name.startswith('__') and file_name.endswith('__') or model_file.suffix != '.py':
+                continue
+            try:
+                models_file_module = __import__(f"apps.{service_name}.models.{file_name}", fromlist=["*"])
+                # Собираем все объекты, которые могут быть моделями
+                for name in filter(
+                        lambda var: var.endswith('Model') and var != Base.__name__,
+                        dir(models_file_module)
+                ):
+                    obj = getattr(models_file_module, name)
+                    if isinstance(obj, type) and issubclass(obj, Base) and obj is not Base:
+                        obj.metadata    # Регистрируем модель
+            except ImportError as e:
+                logger.warning(f"Предупреждение: Не удалось загрузить модели для сервиса {service_name}: {e}")
+                continue
+
+
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -22,11 +70,11 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
-config.set_main_option("sqlalchemy.url", settings.SYNC_DATABASE_URL)
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+
+
+config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL)
+
+load_all_models()
 
 
 def run_migrations_offline() -> None:
@@ -53,26 +101,35 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+def do_run_migrations(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
 
-    In this scenario we need to create an Engine
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    """In this scenario we need to create an Engine
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
+
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
