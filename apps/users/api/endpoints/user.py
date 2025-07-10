@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 from apps.users import models
 from apps.users.api import schemas
 from apps.users.api.dependencies import get_current_user
-from core.database import get_db
+from core.database import SessionDep
 
 router = APIRouter()
 
@@ -20,10 +20,10 @@ async def read_current_user(
 
 @router.get("/me/libraries")
 async def get_user_libraries(
-        current_user: models.User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+        session: SessionDep,
+        current_user: models.User = Depends(get_current_user)
 ):
-    result = await db.execute(
+    result = await session.execute(
         select(models.User)
         .options(selectinload(models.User.libraries))
         .where(models.User.id == current_user.id)
